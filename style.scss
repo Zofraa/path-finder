@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap');
+body{
+    margin: 0px;
+    padding: 0px;
+    font-family: "Play", sans-serif;
+    font-weight: 700;
+}
+.main{
+    &__container{
+        display: flex;
+        flex-direction: column;
+    }
+    &__header{
+        background-color: rgb(80, 80, 80);
+        padding: 15px 0px;
+        margin-bottom: 20px;
+        font-size: 40px;
+        text-align: center;
+        color: white;
+        text-shadow: 0px 0px 5px yellow;
+    }
+    &__desc{
+        font-size: 18px;
+        font-weight: 600;
+        text-align: center;
+    }
+    &__display{
+        font-size: 24px;
+        text-align: center;
+        margin: 30px 0px;
+    }
+}
+.PF{
+    &__map{
+        display: grid;
+        width: fit-content;
+        align-self: center;
+        border: 5px solid black;
+        padding: 25px;
+        border-radius: 30px;
+        margin: 30px;
+    }
+    &__item{
+        border: 2px solid black;
+        display: inline-block;
+        justify-self: center;
+        background-color: #ffffff;
+        width: 20px;
+        height: 20px;
+        &.static{
+            background-color: #ffffff;
+        }
+        &.completed{
+            background-color: #00ffff;
+        }
+        &.inProcess{
+            background-color: #ffff50;
+        }
+        &.failed{
+            background-color: #ff00ff;
+        }
+        &.blocked{
+            background-color: #505050;
+        }
+        &.startPoint{
+            background-color: #50ff50;
+        }
+        &.endPoint{
+            background-color: #ff5050;
+        }
+    }
+}

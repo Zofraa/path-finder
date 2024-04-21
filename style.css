@@ -1,0 +1,71 @@
+@import url("https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap");
+body {
+  margin: 0px;
+  padding: 0px;
+  font-family: "Play", sans-serif;
+  font-weight: 700;
+}
+
+.main__container {
+  display: flex;
+  flex-direction: column;
+}
+.main__header {
+  background-color: rgb(80, 80, 80);
+  padding: 15px 0px;
+  margin-bottom: 20px;
+  font-size: 40px;
+  text-align: center;
+  color: white;
+  text-shadow: 0px 0px 5px yellow;
+}
+.main__desc {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+.main__display {
+  font-size: 24px;
+  text-align: center;
+  margin: 30px 0px;
+}
+
+.PF__map {
+  display: grid;
+  width: -moz-fit-content;
+  width: fit-content;
+  align-self: center;
+  border: 5px solid black;
+  padding: 25px;
+  border-radius: 30px;
+  margin: 30px;
+}
+.PF__item {
+  border: 2px solid black;
+  display: inline-block;
+  justify-self: center;
+  background-color: #ffffff;
+  width: 20px;
+  height: 20px;
+}
+.PF__item.static {
+  background-color: #ffffff;
+}
+.PF__item.completed {
+  background-color: #00ffff;
+}
+.PF__item.inProcess {
+  background-color: #ffff50;
+}
+.PF__item.failed {
+  background-color: #ff00ff;
+}
+.PF__item.blocked {
+  background-color: #505050;
+}
+.PF__item.startPoint {
+  background-color: #50ff50;
+}
+.PF__item.endPoint {
+  background-color: #ff5050;
+}/*# sourceMappingURL=style.css.map */
