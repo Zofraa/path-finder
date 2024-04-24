@@ -7,11 +7,12 @@ window.addEventListener("keydown", (pressedKey) => {
     MainFinder.setPoints(pressedKey, MainField.isHovered);
 })
 const Field = class{
-    constructor(x, y){
+    constructor(x, y, diagonalAllow){
         this.map = new Map();
         this.x = x;
         this.y = y;
         this.isHovered = null;
+        this.diagonalAllow = diagonalAllow;
         let [xi, yi] = [0, 0];
         while(yi < this.y){
             let cell = new Cell(this, xi, yi, ["PF__item", "static"]);
@@ -46,14 +47,23 @@ const Cell = class{
         this.y = y;
         let vector = [
                 [x, y + 1], [x + 1, y],
-                [x, y - 1], [x - 1, y]
+                [x, y - 1], [x - 1, y],
+                [x - 1, y + 1], [x + 1, y + 1],
+                [x + 1, y - 1], [x - 1, y - 1]
             ];
         let vertexes = [];
         if(y < field.y - 1){vertexes.push(vector[0].join("-"))};
         if(x < field.x - 1){vertexes.push(vector[1].join("-"))};
         if(y > 0){vertexes.push(vector[2].join("-"))};
         if(x > 0){vertexes.push(vector[3].join("-"))};
+        if(field.diagonalAllow){
+            if(x > 0 && y < field.y - 1){vertexes.push(vector[4].join("-"))};
+            if(x < field.x - 1 && y < field.y - 1){vertexes.push(vector[5].join("-"))};
+            if(x < field.x - 1 && y > 0){vertexes.push(vector[6].join("-"))};
+            if(x > 0 && y > 0){vertexes.push(vector[7].join("-"))};
+        }
         this.vertexes = vertexes;
+        console.log(x, y, vertexes);
         this.dom = document.createElement("cell");
         this.dom.classList.add(cls, state);
         this.dom.addEventListener("mouseover", () => {
@@ -157,6 +167,6 @@ const PathFinder = class{
         }
     }
 }
-let MainField = new Field(20, 20);
+let MainField = new Field(20, 20, true);
 let MainFinder = new PathFinder(MainField);
 MainField.generateMap("PF__map");
