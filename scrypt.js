@@ -50,6 +50,14 @@ const Field = class{
             }
         }
     }
+    setWalls = (wallPercent) => {
+        this.map.forEach((value, key)=>{
+            if(Math.random() <= wallPercent/100){
+                this.map.get(key).setState("blocked");
+                this.updateCellVertexes(key);
+            }
+        })
+    }
     updateCellVertexes = function(cellPosition){
         for(let vertex of this.map.get(cellPosition).vertexes){
             this.map.get(vertex).setVertexes();
@@ -81,16 +89,12 @@ const Cell = class{
             let [x, y] = coordinates;
             console.log(x, y, coordinates);
             if(x >= 0 && this.field.x - 1 >= x && y >= 0 && this.field.y - 1 >= y){
-                console.log(coordinates + " is accessible");
                 if(this.field.map.get(x + "-" + y).dom.classList[1] !== "blocked"){
-                    console.log(coordinates + " isn't blocked");
-                    return true
+                    return true;
                 }
-                console.log(coordinates + " is blocked");
-                return false
+                return false;
             }else{
-                console.log(coordinates + " isn't accessible");
-                return false
+                return false;
             };
         };
         let vertexList = [];
@@ -111,6 +115,7 @@ const Cell = class{
             if(checkIsBlocked(possibleVertexes[7])){vertexList.push(possibleVertexes[7].join("-"))};
         }
         this.vertexes = vertexList;
+        console.log("VERTEXES UPDATED IN "+this.x+"-"+this.y);
     }
 }
 const PathFinder = class{
@@ -163,7 +168,6 @@ const PathFinder = class{
         let visited = [startPointPos];
         let completed = false;
         let i = 0;
-        console.log("Start Position: " + startPointPos + "\n" + "End Position: " + endPointPos);
         while(completed !== true){
             if(!queue[i]){
                 console.log("can't find path");
@@ -171,8 +175,8 @@ const PathFinder = class{
             }
             let vertexes = mapG(queue[i]).vertexes;
             for(let j = 0; j < vertexes.length; j++){
-                console.log(`current queue => vertex cell: ${queue[i]} => ${vertexes[j]}`); 
-                console.log(`current vertexes: ${vertexes}`);
+                // console.log(`current queue => vertex cell: ${queue[i]} => ${vertexes[j]}`); 
+                // console.log(`current vertexes: ${vertexes}`);
                 if(vertexes[j] === this.points[1]){
                     this.path = (vertexes[j]+" "+queue[i]+" "+this.graph.get(queue[i])).split(" ");
                     this.graph.set(vertexes[j], queue[i] + " " + this.graph.get(queue[i]));
@@ -209,3 +213,4 @@ const PathFinder = class{
 let MainField = new Field(20, 20, true);
 let MainFinder = new PathFinder(MainField);
 MainField.generateMap("PF__map");
+MainField.setWalls(25);
