@@ -20,8 +20,8 @@ const Field = class{
             if(xi >= this.x - 1){
                 xi = 0;
                 yi++;
-            }else{xi++};
-        }
+            }else{xi++}
+        };
         console.log(this.map, this.map.size);
     }
     generateMap = function(containerClass){
@@ -39,35 +39,33 @@ const Field = class{
                 xi++;
             }
         }
+        [xi, yi] = [0, this.y - 1];
+        while(0 <= yi){
+            this.map.get(xi + "-" + yi).setVertexes();
+            if(xi >= this.x - 1 && 0 <= yi){
+                xi = 0;
+                yi--;
+            }else if(yi < this.y){
+                xi++;
+            }
+        }
+    }
+    updateCellVertexes = function(cellPosition){
+        for(let vertex of this.map.get(cellPosition).vertexes){
+            this.map.get(vertex).setVertexes();
+            console.log(`vertexses of ${vertex} is updated`);
+        }
     }
 }
 const Cell = class{
-    constructor(field, x, y, [cls, state]){
-        this.x = x;
-        this.y = y;
-        let vector = [
-                [x, y + 1], [x + 1, y],
-                [x, y - 1], [x - 1, y],
-                [x - 1, y + 1], [x + 1, y + 1],
-                [x + 1, y - 1], [x - 1, y - 1]
-            ];
-        let vertexes = [];
-        if(y < field.y - 1){vertexes.push(vector[0].join("-"))};
-        if(x < field.x - 1){vertexes.push(vector[1].join("-"))};
-        if(y > 0){vertexes.push(vector[2].join("-"))};
-        if(x > 0){vertexes.push(vector[3].join("-"))};
-        if(field.diagonalAllow){
-            if(x > 0 && y < field.y - 1){vertexes.push(vector[4].join("-"))};
-            if(x < field.x - 1 && y < field.y - 1){vertexes.push(vector[5].join("-"))};
-            if(x < field.x - 1 && y > 0){vertexes.push(vector[6].join("-"))};
-            if(x > 0 && y > 0){vertexes.push(vector[7].join("-"))};
-        }
-        this.vertexes = vertexes;
-        console.log(x, y, vertexes);
+    constructor(field, xi, yi, [cls, state]){
+        this.field = field;
+        this.x = xi;
+        this.y = yi;
         this.dom = document.createElement("cell");
         this.dom.classList.add(cls, state);
         this.dom.addEventListener("mouseover", () => {
-            MainField.isHovered = this.x + "-" + this.y;
+            field.isHovered = this.x + "-" + this.y;
             getD.class("main__display")[0].innerText = `cell {${this.x}; ${this.y}} is hovered`;
         });
     }
@@ -78,6 +76,42 @@ const Cell = class{
     }
     getCoordinates = () => {return [this.x, this.y]};
     getPosition = () => {return (this.x+"-"+this.y)};
+    setVertexes = () => {
+        let checkIsBlocked = (coordinates) => {
+            let [x, y] = coordinates;
+            console.log(x, y, coordinates);
+            if(x >= 0 && this.field.x - 1 >= x && y >= 0 && this.field.y - 1 >= y){
+                console.log(coordinates + " is accessible");
+                if(this.field.map.get(x + "-" + y).dom.classList[1] !== "blocked"){
+                    console.log(coordinates + " isn't blocked");
+                    return true
+                }
+                console.log(coordinates + " is blocked");
+                return false
+            }else{
+                console.log(coordinates + " isn't accessible");
+                return false
+            };
+        };
+        let vertexList = [];
+        let possibleVertexes = [
+                [this.x, this.y + 1], [this.x + 1, this.y],
+                [this.x, this.y - 1], [this.x - 1, this.y],
+                [this.x - 1, this.y + 1], [this.x + 1, this.y + 1],
+                [this.x + 1, this.y - 1], [this.x - 1, this.y - 1]
+            ];
+        if(checkIsBlocked(possibleVertexes[0])){vertexList.push(possibleVertexes[0].join("-"))};
+        if(checkIsBlocked(possibleVertexes[1])){vertexList.push(possibleVertexes[1].join("-"))};
+        if(checkIsBlocked(possibleVertexes[2])){vertexList.push(possibleVertexes[2].join("-"))};
+        if(checkIsBlocked(possibleVertexes[3])){vertexList.push(possibleVertexes[3].join("-"))};
+        if(this.field.diagonalAllow){
+            if(checkIsBlocked(possibleVertexes[4])){vertexList.push(possibleVertexes[4].join("-"))};
+            if(checkIsBlocked(possibleVertexes[5])){vertexList.push(possibleVertexes[5].join("-"))};
+            if(checkIsBlocked(possibleVertexes[6])){vertexList.push(possibleVertexes[6].join("-"))};
+            if(checkIsBlocked(possibleVertexes[7])){vertexList.push(possibleVertexes[7].join("-"))};
+        }
+        this.vertexes = vertexList;
+    }
 }
 const PathFinder = class{
     constructor(field){
@@ -98,8 +132,10 @@ const PathFinder = class{
         let mapG = (cellPos) => this.field.map.get(cellPos);
         if(event.code == "KeyB" && !this.points.includes(cellPosition)){
             mapG(cellPosition).setState("blocked");
+            this.field.updateCellVertexes(cellPosition);
         }else if(event.code == "KeyC" && !this.points.includes(cellPosition)){
             mapG(cellPosition).setState("static", true);
+            this.field.updateCellVertexes(cellPosition);
         }else if(event.code == "KeyS" && cellPosition !== this.points[1]){
             if(this.points[0] !== null){
                 mapG(this.points[0]).setState("static");
@@ -128,41 +164,44 @@ const PathFinder = class{
         let completed = false;
         let i = 0;
         console.log("Start Position: " + startPointPos + "\n" + "End Position: " + endPointPos);
-        while(completed === false){
+        while(completed !== true){
             if(!queue[i]){
                 console.log("can't find path");
                 break;
             }
             let vertexes = mapG(queue[i]).vertexes;
             for(let j = 0; j < vertexes.length; j++){
-                if(vertexes[j] === this.points[1] && mapG(vertexes[j]).dom.classList[1] !== "blocked"){
+                console.log(`current queue => vertex cell: ${queue[i]} => ${vertexes[j]}`); 
+                console.log(`current vertexes: ${vertexes}`);
+                if(vertexes[j] === this.points[1]){
                     this.path = (vertexes[j]+" "+queue[i]+" "+this.graph.get(queue[i])).split(" ");
                     this.graph.set(vertexes[j], queue[i] + " " + this.graph.get(queue[i]));
-                    this.path.forEach((cellPos) => {
-                        if(cellPos !== this.points[0] && cellPos !== this.points[1]){
-                            mapG(cellPos).setState("completed");
-                        }
-                    })
-                    console.log("Конечный путь найден");
+                    if(this.path.length > 2){
+                        this.path.forEach((cellPos) => {
+                            if(cellPos !== this.points[0] && cellPos !== this.points[1]){
+                                mapG(cellPos).setState("completed");
+                            };
+                        });
+                    }
+                    console.log("Конечный путь найден: " + this.path, this.path.length);
                     completed = true;
                     break;
                 }
-                if(!visited.includes(vertexes[j])){
-                    if(this.graph.get(queue[i]) && mapG(vertexes[j]).dom.classList[1] !== "blocked"){
+                if(!visited.includes(vertexes[j])){// проверка на посещение
+                    if(this.graph.get(queue[i])){
                         this.graph.set(vertexes[j], queue[i] + " " + this.graph.get(queue[i]));
                     } else if(mapG(vertexes[j]).dom.classList[1] !== "blocked"){
                         this.graph.set(vertexes[j], queue[i]);
                     }
                     visited.push(vertexes[j]);
                 }
-                if(!queue.includes(vertexes[j]) && mapG(vertexes[j]).dom.classList[1] !== "blocked"){
+                if(!queue.includes(vertexes[j])){
                     queue.push(vertexes[j]);
                 }
-                if(mapG(vertexes[j]).dom.classList[1] !== "startPoint" && mapG(vertexes[j]).dom.classList[1] !== "endPoint" && mapG(vertexes[j]).dom.classList[1] !== "blocked"){
+                if(mapG(vertexes[j]).dom.classList[1] !== "startPoint" && mapG(vertexes[j]).dom.classList[1] !== "endPoint"){
                     mapG(vertexes[j]).setState("inProcess");
                 }
             }
-            console.log("Graph: ", this.graph);
             i++;
         }
     }
